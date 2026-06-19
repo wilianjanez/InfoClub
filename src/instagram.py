@@ -1,5 +1,7 @@
 """
-Publicação no Instagram via Meta Graph API (container -> publish).
+Publicação no Instagram via "Instagram API with Instagram Login" (graph.instagram.com).
+Esse é o fluxo que NÃO depende de uma Página do Facebook vinculada — usado nesta conta.
+
 A API exige uma URL pública para a imagem — usamos a URL "raw" do GitHub
 (o caminho da imagem já comitada no repositório).
 """
@@ -8,7 +10,7 @@ import time
 import requests
 
 GRAPH_API_VERSION = "v21.0"
-GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
+GRAPH_API_BASE = f"https://graph.instagram.com/{GRAPH_API_VERSION}"
 
 
 def publicar_no_instagram(image_url: str, legenda: str) -> str:
@@ -67,3 +69,23 @@ def _aguardar_processamento(container_id: str, access_token: str, tentativas: in
         time.sleep(3)
     # Se não confirmou FINISHED após as tentativas, segue tentando publicar de qualquer forma
     # (imagens normalmente processam em segundos; isso é uma rede de segurança).
+
+
+def renovar_token(access_token: str) -> dict:
+    """
+    Renova um token de longa duração (válido, com pelo menos 24h de vida) por
+    outro de 60 dias a partir de hoje. Usa o endpoint graph.instagram.com/refresh_access_token,
+    específico do fluxo "Instagram API with Instagram Login" (não usa app_secret).
+
+    Retorna um dict com 'access_token' (novo token) e 'expires_in' (segundos até expirar).
+    """
+    resp = requests.get(
+        "https://graph.instagram.com/refresh_access_token",
+        params={
+            "grant_type": "ig_refresh_token",
+            "access_token": access_token,
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()

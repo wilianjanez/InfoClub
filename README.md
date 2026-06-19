@@ -22,14 +22,17 @@ GitHub Actions (cron, 3x/dia)
 
 ```
 .
-├── .github/workflows/publicar.yml   # workflow do GitHub Actions (cron 3x/dia)
-├── data/temas.xlsx                  # planilha com 1000 temas prontos
+├── .github/workflows/
+│   ├── publicar.yml                 # workflow principal (cron 3x/dia)
+│   └── renovar_token.yml            # renova o IG_ACCESS_TOKEN automaticamente
+├── data/temas.xlsx                  # planilha com 1.379 temas prontos
 ├── imagens/                         # imagens geradas (comitadas automaticamente)
 ├── src/
 │   ├── planilha.py                  # leitura/atualização da planilha
 │   ├── roteiro.py                   # geração do roteiro via GPT
 │   ├── imagem.py                    # geração da imagem via GPT Image Mini
-│   ├── instagram.py                 # publicação via Graph API
+│   ├── instagram.py                 # publicação via Graph API (graph.instagram.com)
+│   ├── renovar_token.py             # renovação do token + atualização do Secret no GitHub
 │   └── main.py                      # orquestração (etapas "gerar" e "publicar")
 ├── scripts_auxiliares/              # scripts usados só para (re)gerar a planilha
 │   ├── gerar_temas_lista.py         # lista-fonte dos 1000 temas iniciais, por categoria
@@ -83,13 +86,31 @@ vai falhar avisando que não há temas disponíveis — é hora de adicionar mai
 
 ### 2. Conta do Instagram
 
-Pré-requisitos na conta que vai publicar:
+Esse projeto usa o fluxo **"Instagram API with Instagram Login"** — mais simples que o
+fluxo via Página do Facebook, porque **não exige Página do Facebook vinculada**.
+
+Pré-requisitos:
 1. Conta Instagram convertida para **Profissional** (Business ou Creator).
-2. Vinculada a uma **Página do Facebook**.
-3. Conectada ao **mesmo App no Meta for Developers** que você já usa na sua outra automação
-   (já que esse app já tem a permissão `instagram_business_content_publish` aprovada).
-4. Gere, para essa conta especificamente, o **Instagram Business Account ID** e o
-   **Access Token** (token de longa duração, recomenda-se o token de 60 dias renovável).
+2. No painel do seu App em **Meta for Developers**, dentro do caso de uso
+   **"Gerenciar mensagens e conteúdo no Instagram" → Personalizar → API do Instagram**:
+   - Em **Permissões e recursos**, garanta que `instagram_business_content_publish`
+     está habilitada (além de `instagram_business_basic`).
+   - Em **Funções do app → Funções**, adicione a conta Instagram como **"Testador do Instagram"**
+     (usando o @usuário). A própria conta precisa **aceitar o convite** pelo app/site do
+     Instagram antes do próximo passo funcionar.
+   - Na seção **"2. Gerar tokens de acesso"**, clique em **Adicionar conta**, autorize com
+     a conta Instagram, e depois clique em **Gerar token** ao lado da conta listada.
+3. Essa tela já te dá os dois valores que você precisa:
+   - O **`IG_USER_ID`** aparece como um número de 17 dígitos embaixo do @usuário da conta
+     (ex: `17841422115093055`).
+   - O **`IG_ACCESS_TOKEN`** é o valor gerado pelo botão "Gerar token" — já vem como token
+     de longa duração (60 dias).
+4. Para confirmar a validade e os escopos do token antes de usar, cole-o em
+   **https://developers.facebook.com/tools/debug/accesstoken/** e clique em "Debug".
+
+> ⚠️ Esse fluxo é diferente do que usa Página do Facebook + `graph.facebook.com`. Se sua
+> outra automação usa esse fluxo via Página, os tokens e IDs **não são intercambiáveis**
+> entre os dois — cada conta gera os seus próprios, pelo caminho que o app permitir.
 
 ### 3. Conta OpenAI
 
@@ -103,16 +124,43 @@ Em **Settings → Secrets and variables → Actions**, crie:
 | Secret | Valor |
 |---|---|
 | `OPENAI_API_KEY` | sua chave da API da OpenAI |
-| `IG_USER_ID` | Instagram Business Account ID da conta que vai publicar |
-| `IG_ACCESS_TOKEN` | Access Token dessa conta |
+| `IG_USER_ID` | o ID de 17 dígitos obtido no passo 2 |
+| `IG_ACCESS_TOKEN` | o token de longa duração obtido no passo 2 |
+| `GH_PAT_PARA_SECRETS` | um Personal Access Token do GitHub com escopo `repo` (veja seção de renovação automática abaixo) |
 
-### 5. Repositório público
+### 5. Renovação automática do token (importante!)
+
+O `IG_ACCESS_TOKEN` expira em **60 dias**. Sem renovação, o bot para de publicar
+silenciosamente quando o token vencer. Para evitar isso, o projeto já inclui um
+segundo workflow (`.github/workflows/renovar_token.yml`) que renova o token
+automaticamente a cada ~15 dias (bem antes do vencimento) e atualiza o Secret
+`IG_ACCESS_TOKEN` no próprio repositório, usando a API do GitHub.
+
+Para esse workflow funcionar, ele precisa de permissão para **escrever Secrets**, o
+que o token padrão do GitHub Actions não permite por padrão. Por isso é necessário criar
+um **Personal Access Token (PAT)**:
+
+1. Vá em **GitHub → Settings (da sua conta) → Developer settings → Personal access tokens
+   → Fine-grained tokens → Generate new token**.
+2. Dê um nome (ex: "infografico-bot-secrets"), defina expiração (ex: 1 ano) e selecione
+   **apenas este repositório**.
+3. Em **Repository permissions**, conceda **"Secrets" → Read and write**.
+4. Gere o token e cole-o no Secret `GH_PAT_PARA_SECRETS` (passo anterior).
+
+> Esse PAT também vai expirar em algum momento (conforme você definir) — é só mais
+> longo que os 60 dias do token do Instagram, então o lembrete é bem menos frequente.
+> Vale anotar a data de expiração escolhida em algum lugar.
+
+Para testar a renovação manualmente antes de depender do agendamento, vá em
+**Actions → Renovar Token Instagram → Run workflow**.
+
+### 6. Repositório público
 
 Para usar GitHub Actions sem limite de minutos, mantenha o repositório **público**.
 Isso também é necessário para a URL `raw.githubusercontent.com` da imagem funcionar sem
 autenticação (a API do Instagram precisa acessar a imagem livremente).
 
-### 6. Testar manualmente antes de ativar o cron
+### 7. Testar manualmente antes de ativar o cron
 
 Vá em **Actions → Publicar Infografico Instagram → Run workflow** para disparar uma
 execução manual (`workflow_dispatch`) e validar o fluxo de ponta a ponta antes de
@@ -153,3 +201,6 @@ Lembre-se: o Brasil não usa mais horário de verão desde 2019, então essa con
   para um com melhor renderização de texto (ex: Gemini 3 Pro Image ou Flux Pro 1.1).
 - Limite da API do Instagram: 100 publicações via API por período de 24h — bem acima do
   uso previsto aqui (3/dia).
+- O `GH_PAT_PARA_SECRETS` (usado só pelo workflow de renovação) tem sua própria data de
+  expiração, definida por você ao criá-lo — diferente do token do Instagram, ele não se
+  renova solo. Vale anotar essa data e renová-lo manualmente quando chegar perto.
