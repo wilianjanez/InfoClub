@@ -39,7 +39,7 @@ Responda APENAS em JSON válido, sem markdown, sem texto fora do JSON, no format
     {"numero": 1, "icone": "nome do ícone em inglês (ex: shield, heart, leaf)", "titulo_topico": "título curto do ponto", "descricao_topico": "uma frase curta explicando o ponto"},
     {"numero": 2, "icone": "...", "titulo_topico": "...", "descricao_topico": "..."}
   ],
-  "dicas_extra": ["dica curta 1", "dica curta 2", "dica curta 3"],
+  "dicas_extra": ["dica curta 1", "dica curta 2"],
   "frase_fechamento": "frase de impacto para fechar o infográfico, em português",
   "legenda_instagram": "legenda em português do Brasil para o post do Instagram, com 2-3 frases envolventes seguidas de 8 a 12 hashtags relevantes ao tema e à categoria, misturando hashtags amplas (ex: #curiosidades #vocesabia) com específicas do tema"
 }
@@ -63,24 +63,31 @@ def _montar_prompt_imagem(dados: dict) -> str:
     return f"""Create a dense, professional, magazine-style vertical portrait infographic (1024x1536,
 2:3 portrait orientation, taller than wide), modern flat design. Visual style: {dados['estilo_visual']}.
 
-Layout, top to bottom:
-1. Bold large title at the top: "{dados['titulo']}"
+CRITICAL LAYOUT CONSTRAINT: All 7 sections below MUST fit completely within the 1024x1536 canvas,
+from top edge to bottom edge, with nothing cut off, overflowing, or hidden. Before finalizing, mentally
+reserve a fixed vertical budget for each section so the last section (closing statement) is fully
+visible with safe margin to the bottom edge. The hero illustration (section 3) should take no more
+than 25% of the total canvas height — keep it impactful but compact, prioritizing leaving enough room
+for all later sections, especially the closing statement, which must never be cropped.
+
+Layout, top to bottom (each section must be smaller/more compact if needed to fit everything in):
+1. Bold title at the top: "{dados['titulo']}"
 2. Subtitle below it: "{dados['subtitulo']}"
-3. A prominent hero illustration area featuring: {dados['assunto_visual_principal']}. This realistic
-   illustration of the main subject must be clearly recognizable and accurate — this is the most
-   important visual element, make it detailed and large enough to be the focal point of the design.
+3. A hero illustration area (max 25% of canvas height) featuring: {dados['assunto_visual_principal']}.
+   This realistic illustration of the main subject must be clearly recognizable and accurate.
 4. Short intro paragraph: "{dados['introducao']}"
 5. A grid or numbered list of {len(dados['topicos'])} sections, each with a flat icon, a short bold
    title, and a one-line description. Render this exact content for each section:
 {topicos_texto}
 6. A highlighted tips box with these short tips: {dicas_texto}
-7. A closing bold statement at the bottom: "{dados['frase_fechamento']}"
+7. A closing bold statement at the bottom, fully visible with margin below it: "{dados['frase_fechamento']}"
 
 All text must be rendered exactly as given, in Portuguese, crisp and legible, high contrast against
-the background, professional infographic typography, clear visual hierarchy, generous spacing between
-sections so it doesn't look cluttered despite the density of content. Keep every text element fully
-inside a safe margin away from all four edges of the vertical canvas — no title, word, or icon should
-ever be cut off or touch the border. If needed, use smaller font sizes rather than letting text overflow.
+the background, professional infographic typography, clear visual hierarchy. Use compact spacing
+between sections rather than generous spacing if that's what it takes to fit all 7 sections fully
+inside the canvas. Keep every text element fully inside a safe margin away from all four edges —
+no title, word, icon, or section (especially the last one) should ever be cut off or touch the border.
+Reduce font sizes or icon sizes as needed rather than letting any content overflow past the bottom edge.
 No watermarks, no logos."""
 
 
