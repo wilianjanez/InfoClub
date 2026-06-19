@@ -1,0 +1,56 @@
+name: Publicar Infografico Instagram
+
+on:
+  schedule:
+    # Horários em UTC. Brasil (BRT, UTC-3) sem horário de verão:
+    # 09:00 BRT -> 12:00 UTC | 14:00 BRT -> 17:00 UTC | 19:00 BRT -> 22:00 UTC
+    - cron: "0 12 * * *"
+    - cron: "0 17 * * *"
+    - cron: "0 22 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Etapa 1 - Sortear tema, gerar roteiro e imagem
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python src/main.py gerar
+
+      - name: Configurar identidade do git
+        run: |
+          git config user.name "infografico-bot"
+          git config user.email "infografico-bot@users.noreply.github.com"
+
+      - name: Commit e push da imagem gerada
+        run: |
+          git add imagens/
+          git commit -m "Adiciona imagem do infografico gerado [skip ci]"
+          git push
+
+      - name: Etapa 2 - Publicar no Instagram
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: python src/main.py publicar
+
+      - name: Commit e push da planilha atualizada
+        run: |
+          git add data/temas.xlsx
+          git commit -m "Marca tema como publicado [skip ci]"
+          git push
