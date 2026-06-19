@@ -1,5 +1,5 @@
 """
-Geração da imagem do infográfico usando o modelo GPT Image 1 Mini (OpenAI) — opção econômica.
+Geração da imagem do infográfico usando o modelo GPT Image 1 Mini (OpenAI).
 """
 import base64
 import os
@@ -7,7 +7,7 @@ from openai import OpenAI
 
 MODELO_IMAGEM = "gpt-image-1-mini"
 TAMANHO = "1024x1024"
-QUALIDADE = "medium"  # low | medium | high — medium equilibra custo e legibilidade de texto
+QUALIDADE = "high"  # low | medium | high — high prioriza legibilidade de texto, custo maior
 
 
 def gerar_imagem(prompt_imagem: str, caminho_saida: str) -> str:
