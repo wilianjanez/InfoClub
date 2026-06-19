@@ -49,8 +49,8 @@ def _montar_prompt_imagem(dados: dict) -> str:
     )
     dicas_texto = "; ".join(dados.get("dicas_extra", []))
 
-    return f"""Create a dense, professional, magazine-style square infographic (1024x1024),
-modern flat design. Visual style: {dados['estilo_visual']}.
+    return f"""Create a dense, professional, magazine-style vertical portrait infographic (1024x1536,
+2:3 portrait orientation, taller than wide), modern flat design. Visual style: {dados['estilo_visual']}.
 
 Layout, top to bottom:
 1. Bold large title at the top: "{dados['titulo']}"
@@ -65,7 +65,7 @@ Layout, top to bottom:
 All text must be rendered exactly as given, in Portuguese, crisp and legible, high contrast against
 the background, professional infographic typography, clear visual hierarchy, generous spacing between
 sections so it doesn't look cluttered despite the density of content. Keep every text element fully
-inside a safe margin away from all four edges of the square canvas — no title, word, or icon should
+inside a safe margin away from all four edges of the vertical canvas — no title, word, or icon should
 ever be cut off or touch the border. If needed, use smaller font sizes rather than letting text overflow.
 No watermarks, no logos."""
 
