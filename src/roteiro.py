@@ -14,6 +14,14 @@ com ícone + título curto + descrição de uma linha cada, um bloco de dicas ex
 fechamento). NUNCA gere um infográfico raso com poucos tópicos soltos — o conteúdo deve ser denso
 e informativo, como uma página de revista, mesmo mantendo a leitura fácil.
 
+Todo infográfico precisa de uma imagem central de destaque (hero image) que mostre de forma realista
+e reconhecível o assunto principal do tema — por exemplo: se o tema é sobre um animal específico,
+uma ilustração realista desse animal exato (não um ícone genérico); se é sobre um país, uma cena ou
+marco reconhecível desse país; se é sobre uma máquina/mecanismo, uma ilustração técnica realista
+desse objeto; se é sobre um conceito abstrato (ex: "o que é inflação"), uma cena ou objeto que
+represente bem o conceito de forma concreta. Essa imagem central é o elemento mais importante para
+prender a atenção e ensinar visualmente o que é o assunto — não pule essa etapa.
+
 A paleta de cores e o estilo visual (fundo claro ou escuro, paleta de cores, ilustrações ou ícones
 flat) devem ser escolhidos por você de acordo com o que combina melhor com o TEMA e a CATEGORIA
 recebidos — por exemplo, temas de saúde/bem-estar podem pedir um visual clean e claro, enquanto
@@ -26,6 +34,7 @@ Responda APENAS em JSON válido, sem markdown, sem texto fora do JSON, no format
   "subtitulo": "linha de apoio ao título, em português, max 10 palavras",
   "introducao": "1-2 frases de abertura explicando o tema, em português",
   "estilo_visual": "descrição curta em português do estilo escolhido para este tema (ex: 'fundo claro, paleta pastel verde e azul, ícones de linha fina' ou 'fundo escuro, cores neon rosa e amarelo, ícones preenchidos')",
+  "assunto_visual_principal": "descrição detalhada em inglês, para o gerador de imagem, do assunto exato que deve aparecer de forma realista e reconhecível na imagem central de destaque (ex: 'a realistic illustration of a wombat, a stocky Australian marsupial with short legs, brown fur and a flat snout, shown in its natural burrow habitat')",
   "topicos": [
     {"numero": 1, "icone": "nome do ícone em inglês (ex: shield, heart, leaf)", "titulo_topico": "título curto do ponto", "descricao_topico": "uma frase curta explicando o ponto"},
     {"numero": 2, "icone": "...", "titulo_topico": "...", "descricao_topico": "..."}
@@ -36,7 +45,9 @@ Responda APENAS em JSON válido, sem markdown, sem texto fora do JSON, no format
 }
 
 IMPORTANTE: "topicos" deve ter entre 6 e 8 itens, sempre. Cada descricao_topico deve ter informação
-real e específica sobre o tema (não genérica), em no máximo 12 palavras.
+real e específica sobre o tema (não genérica), em no máximo 12 palavras. "assunto_visual_principal"
+deve ser detalhado o suficiente (características físicas, cores, formato) para que o gerador de
+imagem consiga desenhar o item correto, mesmo sem saber previamente como ele é.
 """
 
 
@@ -55,12 +66,15 @@ def _montar_prompt_imagem(dados: dict) -> str:
 Layout, top to bottom:
 1. Bold large title at the top: "{dados['titulo']}"
 2. Subtitle below it: "{dados['subtitulo']}"
-3. Short intro paragraph: "{dados['introducao']}"
-4. A grid or numbered list of {len(dados['topicos'])} sections, each with a flat icon, a short bold
+3. A prominent hero illustration area featuring: {dados['assunto_visual_principal']}. This realistic
+   illustration of the main subject must be clearly recognizable and accurate — this is the most
+   important visual element, make it detailed and large enough to be the focal point of the design.
+4. Short intro paragraph: "{dados['introducao']}"
+5. A grid or numbered list of {len(dados['topicos'])} sections, each with a flat icon, a short bold
    title, and a one-line description. Render this exact content for each section:
 {topicos_texto}
-5. A highlighted tips box with these short tips: {dicas_texto}
-6. A closing bold statement at the bottom: "{dados['frase_fechamento']}"
+6. A highlighted tips box with these short tips: {dicas_texto}
+7. A closing bold statement at the bottom: "{dados['frase_fechamento']}"
 
 All text must be rendered exactly as given, in Portuguese, crisp and legible, high contrast against
 the background, professional infographic typography, clear visual hierarchy, generous spacing between
@@ -89,7 +103,7 @@ def gerar_roteiro(tema: str, categoria: str) -> dict:
     dados = json.loads(conteudo)
 
     obrigatorios = [
-        "titulo", "subtitulo", "introducao", "estilo_visual",
+        "titulo", "subtitulo", "introducao", "estilo_visual", "assunto_visual_principal",
         "topicos", "dicas_extra", "frase_fechamento", "legenda_instagram",
     ]
     faltando = [campo for campo in obrigatorios if campo not in dados]

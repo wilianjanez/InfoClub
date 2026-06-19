@@ -1,8 +1,5 @@
 """
-Geração da imagem do infográfico usando o modelo GPT Image 1.5 (OpenAI).
-Modelo mais caro que o Mini, mas com melhor renderização de texto e estética visual
-mais rica/comercial — testado em substituição ao gpt-image-1-mini para avaliar
-se o salto de qualidade compensa o custo maior (~R$ 67-100/mês vs ~R$ 20/mês).
+Geração da imagem do infográfico usando o modelo GPT Image 1 Mini (OpenAI).
 Formato retrato (1024x1536), compatível com o range de aspect ratio aceito
 pelo Instagram para posts de feed (1.91:1 a 4:5 / 3:4) — evita cortes na exibição.
 """
@@ -10,7 +7,7 @@ import base64
 import os
 from openai import OpenAI
 
-MODELO_IMAGEM = "gpt-image-1.5"
+MODELO_IMAGEM = "gpt-image-1-mini"
 TAMANHO = "1024x1536"  # retrato — formato recomendado para feed do Instagram em 2026
 QUALIDADE = "high"  # low | medium | high — high prioriza legibilidade de texto, custo maior
 
