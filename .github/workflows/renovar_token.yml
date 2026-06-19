@@ -1,0 +1,32 @@
+name: Renovar Token Instagram
+
+on:
+  schedule:
+    # Roda a cada 45 dias (margem de segurança antes dos 60 dias de validade do token).
+    # Cron não suporta "a cada N dias" diretamente, então usamos um dia fixo do mês
+    # e o fato de o token aceitar refresh a qualquer momento após 24h de vida resolve
+    # o resto: rodar com mais frequência do que o necessário não é um problema.
+    - cron: "0 6 1,16 * *"  # todo dia 1 e dia 16 de cada mês, às 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  renovar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Renovar token e atualizar Secret
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_PAT_PARA_SECRETS: ${{ secrets.GH_PAT_PARA_SECRETS }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python src/renovar_token.py
