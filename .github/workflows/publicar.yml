@@ -3,9 +3,9 @@ name: Publicar Infografico Instagram
 on:
   schedule:
     # Horários em UTC. Brasil (BRT, UTC-3) sem horário de verão:
-    # 09:00 BRT -> 12:00 UTC | 14:00 BRT -> 17:00 UTC | 19:00 BRT -> 22:00 UTC
-    - cron: "0 12 * * *"
-    - cron: "0 17 * * *"
+    # 07:00 BRT -> 10:00 UTC | 12:00 BRT -> 15:00 UTC | 19:00 BRT -> 22:00 UTC
+    - cron: "0 10 * * *"
+    - cron: "0 15 * * *"
     - cron: "0 22 * * *"
   workflow_dispatch: {}
 
