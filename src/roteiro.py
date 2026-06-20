@@ -44,10 +44,11 @@ Responda APENAS em JSON válido, sem markdown, sem texto fora do JSON, no format
   "legenda_instagram": "legenda em português do Brasil para o post do Instagram, com 2-3 frases envolventes seguidas de 8 a 12 hashtags relevantes ao tema e à categoria, misturando hashtags amplas (ex: #curiosidades #vocesabia) com específicas do tema"
 }
 
-IMPORTANTE: "topicos" deve ter entre 6 e 8 itens, sempre. Cada descricao_topico deve ter informação
-real e específica sobre o tema (não genérica), em no máximo 12 palavras. "assunto_visual_principal"
-deve ser detalhado o suficiente (características físicas, cores, formato) para que o gerador de
-imagem consiga desenhar o item correto, mesmo sem saber previamente como ele é.
+IMPORTANTE: "topicos" deve ter NO MÁXIMO 8 itens e NO MÍNIMO 6 itens — nunca 9 ou mais, nunca menos
+de 6. Conte os itens antes de responder. Cada descricao_topico deve ter informação real e específica
+sobre o tema (não genérica), em no máximo 12 palavras. "assunto_visual_principal" deve ser detalhado
+o suficiente (características físicas, cores, formato) para que o gerador de imagem consiga desenhar
+o item correto, mesmo sem saber previamente como ele é.
 """
 
 
@@ -70,6 +71,12 @@ visible with safe margin to the bottom edge. The hero illustration (section 3) s
 than 25% of the total canvas height — keep it impactful but compact, prioritizing leaving enough room
 for all later sections, especially the closing statement, which must never be cropped.
 
+TOP MARGIN IS CRITICAL: leave at least 60px of empty padding above the title — the title text must
+start well below the top edge, never touching or being cut by it. This applies even more strictly
+than other margins, because many viewing apps slightly crop the very top of square/portrait images.
+The title's full height (including ascenders and any accents) must be 100% visible with clear empty
+space above it.
+
 Layout, top to bottom (each section must be smaller/more compact if needed to fit everything in):
 1. Bold title at the top: "{dados['titulo']}"
 2. Subtitle below it: "{dados['subtitulo']}"
@@ -83,12 +90,15 @@ Layout, top to bottom (each section must be smaller/more compact if needed to fi
 7. A closing bold statement at the bottom, fully visible with margin below it: "{dados['frase_fechamento']}"
 
 All text must be rendered exactly as given, in Portuguese, crisp and legible, high contrast against
-the background, professional infographic typography, clear visual hierarchy. Use compact spacing
-between sections rather than generous spacing if that's what it takes to fit all 7 sections fully
-inside the canvas. Keep every text element fully inside a safe margin away from all four edges —
-no title, word, icon, or section (especially the last one) should ever be cut off or touch the border.
-Reduce font sizes or icon sizes as needed rather than letting any content overflow past the bottom edge.
-No watermarks, no logos."""
+the background, professional infographic typography, clear visual hierarchy. Use a clean, simple,
+highly legible sans-serif or rounded font for ALL text — avoid decorative, handwritten, artistic, or
+stylized fonts, since they distort accents and letters and make Portuguese words hard to read correctly.
+Spelling and accentuation must be 100% exact, with no altered, swapped, or missing accent marks.
+Use compact spacing between sections rather than generous spacing if that's what it takes to fit all
+7 sections fully inside the canvas. Keep every text element fully inside a safe margin away from all
+four edges — no title, word, icon, or section (especially the last one) should ever be cut off or
+touch the border. Reduce font sizes or icon sizes as needed rather than letting any content overflow
+past the bottom edge. No watermarks, no logos."""
 
 
 def gerar_roteiro(tema: str, categoria: str) -> dict:
@@ -117,9 +127,12 @@ def gerar_roteiro(tema: str, categoria: str) -> dict:
     if faltando:
         raise ValueError(f"Resposta do GPT incompleta, faltando: {faltando}")
 
-    if not (6 <= len(dados["topicos"]) <= 8):
+    if len(dados["topicos"]) > 8:
+        dados["topicos"] = dados["topicos"][:8]
+
+    if len(dados["topicos"]) < 6:
         raise ValueError(
-            f"Esperado entre 6 e 8 tópicos, recebido {len(dados['topicos'])}."
+            f"Esperado no mínimo 6 tópicos, recebido {len(dados['topicos'])}."
         )
 
     dados["prompt_imagem"] = _montar_prompt_imagem(dados)
