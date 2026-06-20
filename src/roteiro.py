@@ -71,14 +71,16 @@ visible with safe margin to the bottom edge. The hero illustration (section 3) s
 than 25% of the total canvas height — keep it impactful but compact, prioritizing leaving enough room
 for all later sections, especially the closing statement, which must never be cropped.
 
-TOP MARGIN IS CRITICAL: leave at least 60px of empty padding above the title — the title text must
+TOP MARGIN IS CRITICAL: leave at least 100px of empty padding above the title — the title text must
 start well below the top edge, never touching or being cut by it. This applies even more strictly
 than other margins, because many viewing apps slightly crop the very top of square/portrait images.
 The title's full height (including ascenders and any accents) must be 100% visible with clear empty
-space above it.
+space above it. To guarantee this, use a MODERATE, MEDIUM font size for the title — NOT an extra-large
+or full-width headline that spans edge to edge. The title should occupy at most 70% of the canvas
+width and be sized so it comfortably fits with generous breathing room on all sides, especially above it.
 
 Layout, top to bottom (each section must be smaller/more compact if needed to fit everything in):
-1. Bold title at the top: "{dados['titulo']}"
+1. Title near the top (medium-large size, NOT oversized, with generous empty space above it): "{dados['titulo']}"
 2. Subtitle below it: "{dados['subtitulo']}"
 3. A hero illustration area (max 25% of canvas height) featuring: {dados['assunto_visual_principal']}.
    This realistic illustration of the main subject must be clearly recognizable and accurate.
