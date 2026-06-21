@@ -79,6 +79,24 @@ space above it. To guarantee this, use a MODERATE, MEDIUM font size for the titl
 or full-width headline that spans edge to edge. The title should occupy at most 70% of the canvas
 width and be sized so it comfortably fits with generous breathing room on all sides, especially above it.
 
+SIDE MARGINS ARE CRITICAL, ESPECIALLY IF USING A TWO-COLUMN LAYOUT: if you choose to lay out the
+{len(dados['topicos'])} sections as two columns side by side (instead of a single column), this is
+the single most common cause of cropped text — the right column's text routinely gets clipped by the
+right edge. To prevent this: leave at least 60px of empty padding on BOTH the left and right edges of
+the canvas; make the two columns narrower than you initially want, with a visible gutter (empty space)
+between them; never let any word, accent, or punctuation in the right column extend into or touch the
+right 60px margin. If a description doesn't fit on one line within the narrower column, wrap it to a
+second line — never let it run off the edge. When in doubt, prefer a single-column layout over a
+two-column layout, since it is much easier to keep fully inside the canvas.
+
+NUMBERING MUST BE SEQUENTIAL AND UNIQUE — NOT PER-COLUMN: if you use a two-column layout, do NOT
+restart or repeat numbers in the second column. The numbers given below (1 through {len(dados['topicos'])})
+are the exact final numbers to render — copy them exactly as given, in order, with no repeats, no
+skips, and no restarting the count partway through. A reader scanning top-to-bottom-then-next-column
+(or left-column-top-to-bottom, then right-column-top-to-bottom) must see the exact sequence
+1, 2, 3, 4, 5, 6{', 7' if len(dados['topicos']) >= 7 else ''}{', 8' if len(dados['topicos']) == 8 else ''}
+with no duplicates and no gaps.
+
 Layout, top to bottom (each section must be smaller/more compact if needed to fit everything in):
 1. Title near the top (medium-large size, NOT oversized, with generous empty space above it): "{dados['titulo']}"
 2. Subtitle below it: "{dados['subtitulo']}"
@@ -98,9 +116,9 @@ stylized fonts, since they distort accents and letters and make Portuguese words
 Spelling and accentuation must be 100% exact, with no altered, swapped, or missing accent marks.
 Use compact spacing between sections rather than generous spacing if that's what it takes to fit all
 7 sections fully inside the canvas. Keep every text element fully inside a safe margin away from all
-four edges — no title, word, icon, or section (especially the last one) should ever be cut off or
-touch the border. Reduce font sizes or icon sizes as needed rather than letting any content overflow
-past the bottom edge. No watermarks, no logos."""
+four edges — no title, word, icon, or section (especially the last one, or the right column if using
+two columns) should ever be cut off or touch the border. Reduce font sizes, icon sizes, or column width
+as needed rather than letting any content overflow past any edge. No watermarks, no logos."""
 
 
 def gerar_roteiro(tema: str, categoria: str) -> dict:
