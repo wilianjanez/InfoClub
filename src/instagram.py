@@ -15,7 +15,7 @@ GRAPH_API_BASE = f"https://graph.instagram.com/{GRAPH_API_VERSION}"
 
 def publicar_no_instagram(image_url: str, legenda: str) -> str:
     """
-    Cria o container de mídia e publica no Instagram.
+    Cria o container de mídia e publica no Instagram (feed).
     Retorna o ID da publicação.
     """
     ig_user_id = os.environ["IG_USER_ID"]
@@ -39,6 +39,49 @@ def publicar_no_instagram(image_url: str, legenda: str) -> str:
     _aguardar_processamento(container_id, access_token)
 
     # Passo 2: publicar o container
+    publish_resp = requests.post(
+        f"{GRAPH_API_BASE}/{ig_user_id}/media_publish",
+        params={
+            "creation_id": container_id,
+            "access_token": access_token,
+        },
+        timeout=30,
+    )
+    publish_resp.raise_for_status()
+    media_id = publish_resp.json()["id"]
+
+    return media_id
+
+
+def publicar_story_no_instagram(image_url: str) -> str:
+    """
+    TESTE: tenta criar e publicar um Story usando media_type=STORIES, no mesmo
+    fluxo "Instagram API with Instagram Login" (graph.instagram.com) já usado
+    para o feed. A documentação oficial do Meta para ESTE fluxo específico afirma
+    que Reels e Stories "não são suportados" — esta função existe para confirmar
+    na prática se isso é realmente uma limitação ou se funciona mesmo assim.
+
+    Se falhar, o erro da API (raise_for_status) vai trazer a mensagem exata do
+    motivo — isso nos dirá com certeza se é uma limitação de permissão, de
+    media_type, ou outra coisa.
+    """
+    ig_user_id = os.environ["IG_USER_ID"]
+    access_token = os.environ["IG_ACCESS_TOKEN"]
+
+    container_resp = requests.post(
+        f"{GRAPH_API_BASE}/{ig_user_id}/media",
+        params={
+            "media_type": "STORIES",
+            "image_url": image_url,
+            "access_token": access_token,
+        },
+        timeout=30,
+    )
+    container_resp.raise_for_status()
+    container_id = container_resp.json()["id"]
+
+    _aguardar_processamento(container_id, access_token)
+
     publish_resp = requests.post(
         f"{GRAPH_API_BASE}/{ig_user_id}/media_publish",
         params={
