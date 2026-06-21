@@ -55,15 +55,15 @@ def publicar_no_instagram(image_url: str, legenda: str) -> str:
 
 def publicar_story_no_instagram(image_url: str) -> str:
     """
-    TESTE: tenta criar e publicar um Story usando media_type=STORIES, no mesmo
-    fluxo "Instagram API with Instagram Login" (graph.instagram.com) já usado
-    para o feed. A documentação oficial do Meta para ESTE fluxo específico afirma
-    que Reels e Stories "não são suportados" — esta função existe para confirmar
-    na prática se isso é realmente uma limitação ou se funciona mesmo assim.
+    Publica a imagem como Story, usando media_type=STORIES no mesmo fluxo
+    "Instagram API with Instagram Login" (graph.instagram.com) usado para o feed.
 
-    Se falhar, o erro da API (raise_for_status) vai trazer a mensagem exata do
-    motivo — isso nos dirá com certeza se é uma limitação de permissão, de
-    media_type, ou outra coisa.
+    Validado em produção: apesar de a documentação oficial do Meta para este
+    fluxo específico mencionar que Stories "não são suportados", testamos na
+    prática e funciona normalmente, sem necessidade de Página do Facebook ou
+    permissões adicionais.
+
+    Retorna o ID do Story publicado.
     """
     ig_user_id = os.environ["IG_USER_ID"]
     access_token = os.environ["IG_ACCESS_TOKEN"]
