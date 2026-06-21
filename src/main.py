@@ -6,8 +6,10 @@ Fluxo:
   2. Gera o roteiro (título, tópicos, prompt de imagem, legenda) via GPT
   3. Gera a imagem do infográfico via GPT Image Mini
   4. Salva a imagem em imagens/ (será comitada pelo workflow do GitHub Actions)
-  5. Publica no Instagram, usando a URL "raw" do GitHub para a imagem
-  6. Marca o tema como Publicado=True na planilha
+  5. Publica no Instagram (feed), usando a URL "raw" do GitHub para a imagem
+  6. Publica a mesma imagem também como Story (best effort — não bloqueia o
+     restante do fluxo se falhar)
+  7. Marca o tema como Publicado=True na planilha
 
 Importante: o commit da imagem + planilha de volta ao repositório é feito
 pelo workflow do GitHub Actions (não por este script), pois a imagem precisa
@@ -25,7 +27,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.planilha import sortear_tema, marcar_como_publicado
 from src.roteiro import gerar_roteiro
 from src.imagem import gerar_imagem
-from src.instagram import publicar_no_instagram
+from src.instagram import publicar_no_instagram, publicar_story_no_instagram
 
 CAMINHO_PLANILHA = "data/temas.xlsx"
 PASTA_IMAGENS = "imagens"
@@ -75,7 +77,16 @@ def etapa_publicar():
     print(f"URL pública da imagem: {image_url}")
 
     media_id = publicar_no_instagram(image_url, estado["legenda"])
-    print(f"Publicado no Instagram com sucesso. media_id={media_id}")
+    print(f"Publicado no feed com sucesso. media_id={media_id}")
+
+    # A publicação do Story é "best effort": se falhar por qualquer motivo
+    # (instabilidade da API, etc.), não deve impedir o restante do fluxo,
+    # já que o post no feed (a parte principal) já foi concluído com sucesso.
+    try:
+        story_id = publicar_story_no_instagram(image_url)
+        print(f"Publicado também como Story. story_id={story_id}")
+    except Exception as e:
+        print(f"Aviso: falha ao publicar Story (feed não foi afetado). Erro: {e}")
 
     marcar_como_publicado(CAMINHO_PLANILHA, estado["row"])
     print("Planilha atualizada (Publicado=True).")
