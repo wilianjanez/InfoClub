@@ -6,7 +6,7 @@ on:
     # 05:00 BRT -> 08:00 UTC | 11:00 BRT -> 14:00 UTC | 18:00 BRT -> 21:00 UTC
     - cron: "0 08 * * *"
     #- cron: "0 14 * * *"
-    - cron: "0 21 * * *"
+    #- cron: "0 21 * * *"
   workflow_dispatch: {}
 
 permissions:
